@@ -25,13 +25,13 @@ const Addsubject = () => {
 
   const handleAddSubject = async (data) => {
     let subjectCode = data.subject_code.toUpperCase();
-    let score = data.score.toUpperCase();
+    let score = data.score.toUpperCase().trim();
     let state = true;
     setIsLoading(true);
     try {
       await addDoc(collection(db, "subjects"), {
         no_cre: parseInt(data.no_cre),
-        score: score.trim(),
+        score: score,
         semester: data.semester,
         subject_code: subjectCode,
         subject_name: data.subject_name,

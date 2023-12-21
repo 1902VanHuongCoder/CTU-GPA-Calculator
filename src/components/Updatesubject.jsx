@@ -34,7 +34,7 @@ const Updatesubject = () => {
   const [physicalEducation, setPhysicalEducation] = useState(state.physicalEducation);
   const onUpdateSubject = async (data) => {
     let subjectCodeUpper = subjectCode.toUpperCase();
-    let scoreUpperCase = score.toUpperCase();
+    let scoreUpperCase = score.toUpperCase().trim();
     let state = true;
     setIsLoading(true);
     try {
