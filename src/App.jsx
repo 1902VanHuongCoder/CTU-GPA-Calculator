@@ -23,14 +23,14 @@ function App() {
   return (
     <div className="relative w-full overflow-x-hidden">
       <Routes className="bg-red-700">
-        <Route path="/Cumulative_points_calculator/login" element={<Login />}></Route>
-        <Route path="/Cumulative_points_calculator/signup" element={<Signup />}></Route>
-        <Route path="/Cumulative_points_calculator/greeting" element={<Greeting />}></Route>
-        <Route path="/Cumulative_points_calculator/addsubject" element={<Addsubject />}></Route>
-        <Route path="/Cumulative_points_calculator/update/*" element={<Updatesubject />}></Route>
-        <Route path="/Cumulative_points_calculator/gpa" element={<Gpa />}></Route>
-        <Route path="/Cumulative_points_calculator" element={<Home />}></Route>
-        <Route path="/Cumulative_points_calculator/home" element={<Home />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/greeting" element={<Greeting />}></Route>
+        <Route path="/addsubject" element={<Addsubject />}></Route>
+        <Route path="/update/*" element={<Updatesubject />}></Route>
+        <Route path="/gpa" element={<Gpa />}></Route>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/home" element={<Home />}></Route>
       </Routes>
       <div
         className={`fixed top-0 left-0 ${
