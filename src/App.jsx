@@ -32,6 +32,7 @@ function App() {
         <Route path="/" element={<Home />}></Route>
         <Route path="/home" element={<Home />}></Route>
       </Routes>
+      Hello
       <div
         className={`fixed top-0 left-0 ${
           isLoading ? "block" : "hidden"
