@@ -31,7 +31,7 @@ const Addsubject = () => {
     try {
       await addDoc(collection(db, "subjects"), {
         no_cre: parseInt(data.no_cre),
-        score: score,
+        score: score.trim(),
         semester: data.semester,
         subject_code: subjectCode,
         subject_name: data.subject_name,
