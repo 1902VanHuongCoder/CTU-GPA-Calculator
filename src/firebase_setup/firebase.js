@@ -3,15 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 const firebaseConfig = {
-  apiKey: import.meta.VITE_API_KEY,
-  authDomain: import.meta.VITE_AUTH_DOMAIN,
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
   databaseURL:
     "https://cumulative-points-calcul-73190-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: import.meta.VITE_PROJECT_ID,
-  storageBucket: import.meta.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.VITE_MESSAGE_SENDER_ID,
-  appId: import.meta.VITE_APP_ID,
-  measurementId: import.meta.VITE_MEASUREMENT_ID,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGE_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
