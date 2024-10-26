@@ -5,6 +5,8 @@ import facebookIcon from "../assets/facebookIcon.png";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import { FaRegWindowClose } from "react-icons/fa";
 import { FaPenToSquare } from "react-icons/fa6";
+import { FaFilter } from "react-icons/fa";
+
 import Navbar from "./default_components/Navbar";
 import Sidebar from "./default_components/Sidebar";
 import { useContext, useEffect, useState } from "react";
@@ -14,37 +16,38 @@ import { db } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
 import { NotificationsContext } from "../contexts/notificationContext";
 import letterToNumericalGrades from "../helpers/letterToNumericalGrades";
+
 const Home = () => {
   const { setIsLoading } = useContext(LoadingContext);
   const { setIsShow, setContent, setType } = useContext(NotificationsContext);
   const [subjectsDatas, setSubjectsDatas] = useState([]);
   const [currentSection, setCurrentSection] = useState(1);
-
-  console.log(subjectsDatas);
-  const fetchSubjectsDatas = async () => {
-    var err = false;
-    setIsLoading(true);
-    try {
-      await getDocs(collection(db, "subjects")).then((response) => {
-        const dataResponsed = response.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        setSubjectsDatas(dataResponsed);
-      });
-    } catch (error) {
-      err = true;
-      console.log(error);
-    }
-
-    if (!err) {
-      setIsLoading(false);
-    }
-  };
+  const [filteredData, setFilteredData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchSubjectsDatas();
   }, []);
+
+  const fetchSubjectsDatas = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getDocs(collection(db, "subjects"));
+      const dataResponsed = response.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setSubjectsDatas(dataResponsed);
+    } catch (error) {
+      console.log(error);
+      // Retry logic
+      setTimeout(fetchSubjectsDatas, 5000); // Retry after 5 seconds
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   var sliceArray = subjectsDatas.slice(
     currentSection * 5 - 5,
@@ -97,6 +100,25 @@ const Home = () => {
       window.location.reload();
     }
   };
+  const handleFilterChange = () => {
+    const filtered = subjectsDatas.filter((subject) => {
+      return (
+        (selectedYear ? subject.year === selectedYear : true) &&
+        (selectedSemester ? subject.semester === selectedSemester : true) &&
+        (searchTerm
+          ? subject.subject_name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
+          : true)
+      );
+    });
+    setFilteredData(filtered);
+  };
+
+  useEffect(() => {
+    handleFilterChange();
+  }, [selectedYear, selectedSemester, subjectsDatas, searchTerm]);
+
   return (
     <div className="relative w-full min-h-screen overflow-scroll lg:h-screen lg:overflow-hidden bg-gradient-to-tr from-cyan-300 to-pink-600">
       <div
@@ -111,72 +133,132 @@ const Home = () => {
         >
           <div className="w-full lg:flex">
             <div className={`w-full lg:w-2/3 h-fit mb-16 sm:mb-0`}>
-              <div className="w-[320px] h-[352px] sm:w-full sm:h-fit overflow-scroll sm:overflow-auto  mx-auto px-3">
-                <div className="w-[600px] h-[300px] sm:h-fit sm:w-[95%] mx-auto text-[12px] sm:text-[14px]">
-                  <ul className="text-white w-full flex px-1 lg:px-5 py-2">
-                    <li className="basis-[6%] text-center">STT</li>
-                    <li className="basis-[25%] lg:basis-[36%] text-center">
-                      Subject Name
-                    </li>
-                    <li className="basis-[13%] lg:basis-[15%] text-center">
-                      No. Cre
-                    </li>
-                    <li className="basis-[8%] text-center">Score</li>
-                    <li className="basis-[15%] lg:basis-[10%] text-center">
-                      Semester
-                    </li>
-                    <li className="basis-[21%] lg:basis-[15%] text-center ">
-                      Year
-                    </li>
-                    <li className="basis-[12%]  text-center">Action</li>
-                  </ul>
-                  {sliceArray.map((subject, index) => {
-                    return (
-                      <ul
-                        data-aos="flip-down"
-                        key={subject.id}
-                        className={`h-[60px] ${
-                          (index + 1) % 2 === 0
-                            ? "text-white bg-[rgba(0,0,0,0.3)] "
-                            : "bg-[rgba(255,255,255,.8)] text-black"
-                        }w-full flex items-center px-1 lg:px-5 mb-1 rounded-lg`}
-                      >
-                        <li className="basis-[6%] text-center">{index + 1}</li>
-                        <li className="basis-[25%] lg:basis-[36%] text-center">
-                          {subject.subject_name}
-                        </li>
-                        <li className="basis-[13%] lg:basis-[15%] text-center">
-                          {subject.no_cre}
-                        </li>
-                        <li className="basis-[8%] text-center">
-                          {subject.score}
-                        </li>
-                        <li className="basis-[15%] lg:basis-[10%] text-center">
-                          {subject.semester}
-                        </li>
-                        <li className="basis-[21%] lg:basis-[15%] text-center">
-                          {subject.year}
-                        </li>
-                        <li className="basis-[12%] flex gap-x-1 lg:gap-x-2 justify-center items-center ">
-                          <FaPenToSquare
-                            onClick={() =>
-                              hanleRedirectToUpdatePage(subject.id)
-                            }
-                            className="text-green-600 text-[32px]  p-2 cursor-pointer"
-                          />
-                          <span className="opacity-70 text-white">|</span>{" "}
-                          <FaRegWindowClose
-                            onClick={() => handleDeleteSubject(subject.id)}
-                            className="text-red-600 text-[32px] p-2 cursor-pointer"
-                          />
-                        </li>
-                      </ul>
-                    );
-                  })}
+              <div className="mb-4 flex flex-col  gap-y-3">
+                <h2 className="text-white text-left px-6 py-4 text-2xl flex justify-start items-center gap-x-3">
+                  <span className="text-base">
+                    <FaFilter />
+                  </span>{" "}
+                  <span> LỌC MÔN HỌC THEO</span>
+                </h2>
+                <div className="w-full flex justify-between items-center px-6 gap-x-2">
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="p-2 border rounded w-1/2  outline-none"
+                  >
+                    <option value="">Chọn năm</option>
+                    {/* Add options dynamically based on available years */}
+                    {[
+                      ...new Set(subjectsDatas.map((subject) => subject.year)),
+                    ].map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedSemester}
+                    onChange={(e) => setSelectedSemester(e.target.value)}
+                    className="p-2 border rounded w-1/2 outline-none"
+                  >
+                    <option value="">Chọn học kỳ</option>
+                    {/* Add options dynamically based on available semesters */}
+                    {[
+                      ...new Set(
+                        subjectsDatas.map((subject) => subject.semester)
+                      ),
+                    ].map((semester) => (
+                      <option key={semester} value={semester}>
+                        {semester}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-full px-6">
+                  {" "}
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Nhập tên môn học..."
+                    className="p-2 border rounded w-full outline-none"
+                  />
                 </div>
               </div>
-
-              {subjectsDatas.length > 5 && (
+              <div className="w-full overflow-x-scroll flex  justify-center items-center">
+                <div className="w-[750px]">
+                  <table className="min-w-full bg-white text-[14px] border border-[rgba(0,0,0,.1)]">
+                    <thead className="bg-[rgb(216,43,122)] text-white">
+                      <tr>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          STT
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Mã HP
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Tên HP
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Tín chỉ
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Điểm
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Tiên quyết
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          GDTC
+                        </th>
+                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
+                          Hành động
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData.map((subject, index) => (
+                        <tr key={subject.id}>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            {index + 1}
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            {subject.subject_code}
+                          </td>
+                          <td className="text-left  px-2 border border-[rgba(0,0,0,.1)]">
+                            {subject.subject_name}
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            {subject.no_cre}
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            {subject.score}
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            <input
+                              type="checkbox"
+                              checked={subject.prerequisite}
+                              readOnly
+                            />
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            <input
+                              type="checkbox"
+                              checked={subject.physicalEducation}
+                              readOnly
+                            />
+                          </td>
+                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                            <button className="mr-2">Cập nhật</button>
+                            <button>Xóa</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {/* {subjectsDatas.length > 5 && (
                 <div className="w-full my-5 flex justify-center gap-x-5">
                   <button
                     disabled={currentSection < 2 ? true : false}
@@ -197,7 +279,7 @@ const Home = () => {
                     <FaArrowAltCircleRight />
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
             <div className={`w-full lg:w-1/3 flex flex-col gap-y-5`}>
               <div
