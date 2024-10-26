@@ -21,9 +21,10 @@ const Updatesubject = () => {
     formState: { errors },
     reset,
   } = useForm();
+  const { state } = useLocation();
+
   const [semesterDropdownIsOpen, setSemesterDropdownIsOpen] = useState(false);
   const [yearDropdownIsOpen, setYearDropDownIsOpen] = useState(false);
-  const { state } = useLocation();
   const [subjectName, setSubjectName] = useState(state.subject_name);
   const [noCre, setNoCre] = useState(state.no_cre);
   const [subjectCode, setSubjectCode] = useState(state.subject_code);
@@ -31,29 +32,56 @@ const Updatesubject = () => {
   const [semester, setSemester] = useState(state.semester);
   const [year, setYear] = useState(state.year);
   const [prerequisite, setPreRequisite] = useState(state.prerequisite);
-  const [physicalEducation, setPhysicalEducation] = useState(state.physicalEducation);
-  const onUpdateSubject = async (data) => {
-    let subjectCodeUpper = subjectCode.toUpperCase();
-    let scoreUpperCase = score.toUpperCase().trim();
-    let state = true;
+  const [physicalEducation, setPhysicalEducation] = useState(
+    state.physicalEducation
+  );
+
+  const onUpdateSubject = async () => {
+    const data = {
+      id: state.id,
+      no_cre: noCre,
+      physicalEducation: physicalEducation,
+      prerequisite: prerequisite,
+      score: score,
+      semester: semester,
+      subject_code: subjectCode,
+      subject_name: subjectName,
+      year: year,
+    };
+
+    console.log(
+      data.id,
+      data.no_cre,
+      data.physicalEducation,
+      data.prerequisite,
+      data.score,
+      data.semester,
+      data.subject_code,
+      data.subject_name,
+      data.year
+    );
+
+    let subjectCodeUpper = data.subject_code?.toUpperCase();
+    let scoreUpperCase = data.score?.toUpperCase().trim();
+    let updateState = true;
     setIsLoading(true);
     try {
-      await updateDoc(doc(db, "subjects", data.subject_id), {
-        no_cre: parseInt(noCre),
+      await updateDoc(doc(db, "subjects", data.id), {
+        no_cre: parseInt(data.no_cre),
         score: scoreUpperCase,
-        semester: semester,
+        semester: data.semester,
         subject_code: subjectCodeUpper,
-        subject_name: subjectName,
-        year: year,
-        prerequisite: prerequisite,
-        physicalEducation: physicalEducation,
+        subject_name: data.subject_name,
+        year: data.year,
+        prerequisite: data.prerequisite,
+        physicalEducation: data.physicalEducation,
       });
     } catch (error) {
-      state = false;
+      updateState = false;
       console.log(error);
     }
     setIsShow(true);
-    if (state) {
+    if (updateState) {
       setType("success");
       setContent("Updated subject successfully");
       setIsLoading(false);
@@ -91,7 +119,6 @@ const Updatesubject = () => {
                   name="subject_name"
                   id="subject_name"
                   maxLength={40}
-                  
                   type="text"
                   className="h-[40px] w-full outline-none bg-white border-[1px] border-solid border-[rgba(0,0,0,.5)] px-5 text-black rounded-sm focus:border-[rgba(0,0,0,1)]"
                 />
@@ -111,7 +138,6 @@ const Updatesubject = () => {
                   maxLength={1}
                   min={1}
                   max={9}
-                  
                   type="number"
                   className="h-[40px] w-full outline-none bg-white border-[1px] border-solid border-[rgba(0,0,0,.5)] pl-5 pr-2 text-black rounded-sm focus:border-[rgba(0,0,0,1)]"
                 />
@@ -135,7 +161,6 @@ const Updatesubject = () => {
                   name="subject_code"
                   id="subject_code"
                   maxLength={5}
-                  
                   type="text"
                   className="h-[40px] w-full outline-none bg-white border-[1px] border-solid border-[rgba(0,0,0,.5)] px-5 text-black rounded-sm focus:border-[rgba(0,0,0,1)]"
                 />
@@ -236,21 +261,7 @@ const Updatesubject = () => {
                 </select>
               </div>
             </div>
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-2">
-                <input
-                  checked={prerequisite}
-                  className="h-5 w-5"
-                  type="checkbox"
-                  name="prerequisite"
-                  id="prerequisite"
-                  onChange={(e) => setPreRequisite(e.target.value)}
-                />
-                <label htmlFor="prerequisite" className="text-white">
-                  {" "}
-                  Prerequisite <span className="text-red-500">*</span>
-                </label>
-              </div>
+            <div className="flex justify-start gap-x-2 items-center">
               <div className="flex items-center gap-x-2">
                 <input
                   checked={physicalEducation}
@@ -258,10 +269,9 @@ const Updatesubject = () => {
                   type="checkbox"
                   name="physicaledu"
                   id="physicaledu"
-                  onChange={(e) => setPhysicalEducation(e.target.value)}
+                  onChange={(e) => setPhysicalEducation(e.target.checked)}
                 />
                 <label htmlFor="physicaledu" className="text-white">
-                  {" "}
                   Physical education <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -269,8 +279,22 @@ const Updatesubject = () => {
                   id="subject_id"
                   name="subject_id"
                   value={state && state.id}
-                  {...register('subject_id')}
+                  {...register("subject_id")}
                 />
+              </div>
+
+              <div className="flex items-center gap-x-2">
+                <input
+                  checked={prerequisite}
+                  className="h-5 w-5"
+                  type="checkbox"
+                  name="prerequisite"
+                  id="prerequisite"
+                  onChange={(e) => setPreRequisite(e.target.checked)}
+                />
+                <label htmlFor="prerequisite" className="text-white">
+                  Prerequisite <span className="text-red-500">*</span>
+                </label>
               </div>
             </div>
           </div>

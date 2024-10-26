@@ -1,8 +1,4 @@
 import SquaresBgPNG from "../assets/SquaresBgPNG.png";
-import githubIcon from "../assets/githubIcon.png";
-import instagramIcon from "../assets/instagramIcon.png";
-import facebookIcon from "../assets/facebookIcon.png";
-import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import { FaRegWindowClose } from "react-icons/fa";
 import { FaPenToSquare } from "react-icons/fa6";
 import { FaFilter } from "react-icons/fa";
@@ -16,16 +12,18 @@ import { db } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
 import { NotificationsContext } from "../contexts/notificationContext";
 import letterToNumericalGrades from "../helpers/letterToNumericalGrades";
+import Error from "./Error"; // Import the Error component
 
 const Home = () => {
   const { setIsLoading } = useContext(LoadingContext);
   const { setIsShow, setContent, setType } = useContext(NotificationsContext);
   const [subjectsDatas, setSubjectsDatas] = useState([]);
-  const [currentSection, setCurrentSection] = useState(1);
+
   const [filteredData, setFilteredData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [hasNetworkError, setHasNetworkError] = useState(false); // State to track network error
 
   useEffect(() => {
     fetchSubjectsDatas();
@@ -40,19 +38,16 @@ const Home = () => {
         id: doc.id,
       }));
       setSubjectsDatas(dataResponsed);
+      setHasNetworkError(false); // Reset network error state
     } catch (error) {
       console.log(error);
+      setHasNetworkError(true); // Set network error state
       // Retry logic
       setTimeout(fetchSubjectsDatas, 5000); // Retry after 5 seconds
     } finally {
       setIsLoading(false);
     }
   };
-
-  var sliceArray = subjectsDatas.slice(
-    currentSection * 5 - 5,
-    currentSection * 5
-  );
 
   const calculatePoint = () => {
     let cumulativePoint = 0;
@@ -120,10 +115,11 @@ const Home = () => {
   }, [selectedYear, selectedSemester, subjectsDatas, searchTerm]);
 
   return (
-    <div className="relative w-full min-h-screen overflow-scroll lg:h-screen lg:overflow-hidden bg-gradient-to-tr from-cyan-300 to-pink-600">
+    <div className="relative w-full min-h-screen bg-gradient-to-tr from-cyan-300 to-pink-600">
       <div
-        className="w-full h-full bg-repeat"
-        style={{ backgroundImage: `url('${SquaresBgPNG}')` }}
+        className="w-full h-full bg-repeat
+          mb-10
+        "
       >
         <Navbar />
         <div
@@ -185,101 +181,6 @@ const Home = () => {
                   />
                 </div>
               </div>
-              <div className="w-full overflow-x-scroll flex  justify-center items-center">
-                <div className="w-[750px]">
-                  <table className="min-w-full bg-white text-[14px] border border-[rgba(0,0,0,.1)]">
-                    <thead className="bg-[rgb(216,43,122)] text-white">
-                      <tr>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          STT
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Mã HP
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Tên HP
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Tín chỉ
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Điểm
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Tiên quyết
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          GDTC
-                        </th>
-                        <th className=" px-2 border border-[rgba(0,0,0,.1)]">
-                          Hành động
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredData.map((subject, index) => (
-                        <tr key={subject.id}>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            {index + 1}
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            {subject.subject_code}
-                          </td>
-                          <td className="text-left  px-2 border border-[rgba(0,0,0,.1)]">
-                            {subject.subject_name}
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            {subject.no_cre}
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            {subject.score}
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            <input
-                              type="checkbox"
-                              checked={subject.prerequisite}
-                              readOnly
-                            />
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            <input
-                              type="checkbox"
-                              checked={subject.physicalEducation}
-                              readOnly
-                            />
-                          </td>
-                          <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
-                            <button className="mr-2">Cập nhật</button>
-                            <button>Xóa</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              {/* {subjectsDatas.length > 5 && (
-                <div className="w-full my-5 flex justify-center gap-x-5">
-                  <button
-                    disabled={currentSection < 2 ? true : false}
-                    onClick={() => setCurrentSection((pre) => pre - 1)}
-                    className="disabled:opacity-50 disabled:hover:bg-[rgba(0,0,0,.2)] p-5  border-[1px] border-white border-solid rounded-full text-white bg-[rgba(0,0,0,.2)] hover:bg-[rgba(0,0,0,.4)]"
-                  >
-                    <FaArrowAltCircleLeft />
-                  </button>
-                  <button
-                    disabled={
-                      currentSection === Math.ceil(subjectsDatas.length / 5)
-                        ? true
-                        : false
-                    }
-                    onClick={() => setCurrentSection((pre) => pre + 1)}
-                    className="disabled:opacity-50 disabled:hover:bg-transparent p-5 border-[1px] border-white border-solid rounded-full text-white bg-transparent hover:bg-[rgba(255,255,255,.2)]"
-                  >
-                    <FaArrowAltCircleRight />
-                  </button>
-                </div>
-              )} */}
             </div>
             <div className={`w-full lg:w-1/3 flex flex-col gap-y-5`}>
               <div
@@ -293,59 +194,114 @@ const Home = () => {
                   }}
                 >
                   <div className="w-[180px] h-[180px] bg-white rounded-full flex justify-center items-center shadow-inner">
-                    <h2 className="text-5xl">
+                    <h2 className="text-5xl font-bold text-[#e91e63]">
                       {subjectsDatas.length > 0 ? calculatePoint() : "0.00"}
                     </h2>
                   </div>
                 </div>
                 <p className="text-white">
-                  <span className="text-[20px] text-[#fbfe4e]">
+                  Xếp loại{" "}
+                  <span className="text-[20px] text-[#fbfe4e] font-bold">
                     {calculatePoint() > 3.6
-                      ? "Excellent"
+                      ? "Xuất sắc"
                       : calculatePoint() > 3.2
-                      ? "Very good"
-                      : "Good"}
+                      ? "Giỏi"
+                      : "Khá"}
                   </span>{" "}
-                  rating
                 </p>
               </div>
-              <div
-                data-aos="fade-up"
-                className="px-5 flex flex-col gap-y-2 text-white"
-              >
-                <h2 className="w-full py-2 text-[20px]">Notifications</h2>
-                <p className="text-[12px]">
-                  This website is being finalized, so if you have any feedback,
-                  you can contact me via{" "}
-                </p>
-                <div className="flex w-full justify-center gap-x-4">
-                  <a href="">
-                    <img
-                      src={facebookIcon}
-                      alt="facebook icon"
-                      className="w-7"
-                    />
-                  </a>
-                  <a href="">
-                    <img
-                      src={instagramIcon}
-                      alt="instagram icon"
-                      className="w-7"
-                    />
-                  </a>
-                  <a href="">
-                    <img src={githubIcon} alt="github icon" className="w-7" />
-                  </a>
-                </div>
-              </div>
-              <p className="text-[10px] px-5 mb-1 text-white">
-                Designed by Paul @2023
-              </p>
             </div>
           </div>
         </div>
       </div>
+
+      <div className="w-full overflow-x-scroll flex lg:justify-center scrollbar-custom">
+        <div className="min-w-[750px] lg:min-w-full">
+          <table className="min-w-full bg-white text-[14px] border border-[rgba(0,0,0,.1)]">
+            <thead className="bg-[rgb(216,43,122)] text-white">
+              <tr>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  STT
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Mã HP
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Tên HP
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Tín chỉ
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Điểm
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Tiên quyết
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  GDTC
+                </th>
+                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
+                  Hành động
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((subject, index) => (
+                <tr key={subject.id}>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    {index + 1}
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    {subject.subject_code}
+                  </td>
+                  <td className="text-left  px-2 border border-[rgba(0,0,0,.1)]">
+                    {subject.subject_name}
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    {subject.no_cre}
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    {subject.score}
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    <input
+                      type="checkbox"
+                      checked={subject.prerequisite}
+                      readOnly
+                    />
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    <input
+                      type="checkbox"
+                      checked={subject.physicalEducation}
+                      readOnly
+                    />
+                  </td>
+                  <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
+                    <li className="basis-[12%] flex gap-x-1 lg:gap-x-2 justify-center items-center ">
+                      <FaPenToSquare
+                        onClick={() => hanleRedirectToUpdatePage(subject.id)}
+                        className="text-green-600 text-[32px]  p-2 cursor-pointer"
+                      />
+                      <span className="opacity-70 text-white">|</span>{" "}
+                      <FaRegWindowClose
+                        onClick={() => handleDeleteSubject(subject.id)}
+                        className="text-red-600 text-[32px] p-2 cursor-pointer"
+                      />
+                    </li>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <Sidebar />
+      {hasNetworkError && (
+        <Error message="Could not connect to the network. Please check your internet connection and try again." />
+      )}
     </div>
   );
 };
