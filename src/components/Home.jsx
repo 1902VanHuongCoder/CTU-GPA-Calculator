@@ -1,4 +1,3 @@
-import SquaresBgPNG from "../assets/SquaresBgPNG.png";
 import { FaRegWindowClose } from "react-icons/fa";
 import { FaPenToSquare } from "react-icons/fa6";
 import { FaFilter } from "react-icons/fa";
@@ -215,35 +214,19 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="w-full overflow-x-scroll flex lg:justify-center scrollbar-custom">
+      <div className="w-full overflow-x-scroll flex lg:justify-center scrollbar-custom relative">
         <div className="min-w-[750px] lg:min-w-full">
           <table className="min-w-full bg-white text-[14px] border border-[rgba(0,0,0,.1)]">
-            <thead className="bg-[rgb(216,43,122)] text-white">
+            <thead className="bg-[rgb(216,43,122)] text-white sticky top-0 left-0">
               <tr>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  STT
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Mã HP
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Tên HP
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Tín chỉ
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Điểm
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Tiên quyết
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  GDTC
-                </th>
-                <th className=" px-2 py-2 border border-[rgba(0,0,0,.1)]">
-                  Hành động
-                </th>
+                <th className=" px-2 py-2">STT</th>
+                <th className=" px-2 py-2">Mã HP</th>
+                <th className=" px-2 py-2">Tên HP</th>
+                <th className=" px-2 py-2">Tín chỉ</th>
+                <th className=" px-2 py-2">Điểm</th>
+                <th className=" px-2 py-2">Tiên quyết</th>
+                <th className=" px-2 py-2">GDTC</th>
+                <th className=" px-2 py-2">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -266,6 +249,8 @@ const Home = () => {
                   </td>
                   <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
                     <input
+                      disabled
+                      className="*: disabled:opacity-90"
                       type="checkbox"
                       checked={subject.prerequisite}
                       readOnly
@@ -273,6 +258,8 @@ const Home = () => {
                   </td>
                   <td className="text-center  px-2 border border-[rgba(0,0,0,.1)]">
                     <input
+                      className="*: disabled:opacity-90"
+                      disabled
                       type="checkbox"
                       checked={subject.physicalEducation}
                       readOnly
